@@ -5,9 +5,94 @@
 #+begin_src python :results none :session
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import colormaps as colors
+
+def divide_data(data, feat):
+    return (data[feat][data['depression'] == 0], data[feat][data['depression'] == 1])
+
+def group_data(data, col):
+    return data[['depression', col]].groupby(col).mean()
 #+end_src
 
-* Vis 1
+* Exploration
+#+begin_src python :session :results table
+raw = pd.read_csv('studentDepress.csv')
+data = raw.copy()
+# Remap Categorical to numeric
+data['thoughts'] = data['Have you ever had suicidal thoughts ?'].map({'Yes': True, 'No':False})
+data['Financial Stress'] = data['Financial Stress'].replace('?', '0.0').astype(float)
+data['Dietary Habits'] = data['Dietary Habits'].map({
+    'Others': 0,
+    'Healthy': 3,
+    'Moderate': 2,
+    'Unhealthy': 1
+})
+data['Sleep Duration'].map({
+    "'5-6 hours'": 2,
+    "'Less than 5 hours'": 1,
+    "'7-8 hours'": 3,
+    "'More than 8 hours'": 4,
+    'Others': 0
+})
+data = data.drop(columns=['Have you ever had suicidal thoughts ?'])
+mapping = {
+    'id':'id',
+    'Age':'age',
+    'Academic Pressure': 'ac_pressure',
+    'Work Pressure': 'wk_pressure',
+    'CGPA': 'CGPA',
+    'Study Satisfaction': 'study_sat',
+    'Job Satisfaction': 'job_sat',
+    'Dietary Habits': 'diet_hab',
+    'Work/Study Hours': 'hrs',
+    'Financial Stress': 'fin_stress',
+    'Depression': 'depression',
+    'Gender': 'gender',
+    'Age': 'age',
+    'City': 'city',
+    'Profession': 'profession',
+    'Sleep Duration': 'sleep_dur',
+    'Degree': 'degree',
+    'thoughts': 'thoughts'
+}
+data.columns = data.columns.map(mapping)
+
+data.loc[:, np.array(list((data[i].dtype == np.int64) or (data[i].dtype == np.float64) for i in data.columns))].corr().round(4)
+#+end_src
+
+#+RESULTS:
+|             |      id |     age | ac_pressure | wk_pressure |    CGPA | study_sat | job_sat | diet_hab |     hrs | fin_stress | depression |
+|-------------+---------+---------+-------------+-------------+---------+-----------+---------+----------+---------+------------+------------|
+| id          |     1.0 |  0.0038 |      0.0052 |      0.0013 | -0.0123 |    0.0078 |  0.0019 |   0.0108 | -0.0045 |     0.0008 |     0.0009 |
+| age         |  0.0038 |     1.0 |     -0.0758 |       0.002 |  0.0051 |    0.0092 | -0.0004 |   0.0577 | -0.0329 |    -0.0951 |    -0.2264 |
+| ac_pressure |  0.0052 | -0.0758 |         1.0 |     -0.0222 | -0.0222 |    -0.111 | -0.0249 |  -0.0891 |   0.096 |     0.1519 |     0.4748 |
+| wk_pressure |  0.0013 |   0.002 |     -0.0222 |         1.0 | -0.0509 |   -0.0211 |  0.7707 |   0.0063 | -0.0055 |     0.0019 |    -0.0034 |
+| CGPA        | -0.0123 |  0.0051 |     -0.0222 |     -0.0509 |     1.0 |   -0.0441 | -0.0536 |  -0.0018 |  0.0026 |      0.006 |     0.0222 |
+| study_sat   |  0.0078 |  0.0092 |      -0.111 |     -0.0211 | -0.0441 |       1.0 | -0.0219 |   0.0198 | -0.0364 |    -0.0649 |     -0.168 |
+| job_sat     |  0.0019 | -0.0004 |     -0.0249 |      0.7707 | -0.0536 |   -0.0219 |     1.0 |   0.0019 | -0.0052 |     0.0053 |    -0.0035 |
+| diet_hab    |  0.0108 |  0.0577 |     -0.0891 |      0.0063 | -0.0018 |    0.0198 |  0.0019 |      1.0 | -0.0289 |    -0.0871 |    -0.2066 |
+| hrs         | -0.0045 | -0.0329 |       0.096 |     -0.0055 |  0.0026 |   -0.0364 | -0.0052 |  -0.0289 |     1.0 |      0.075 |     0.2086 |
+| fin_stress  |  0.0008 | -0.0951 |      0.1519 |      0.0019 |   0.006 |   -0.0649 |  0.0053 |  -0.0871 |   0.075 |        1.0 |     0.3636 |
+| depression  |  0.0009 | -0.2264 |      0.4748 |     -0.0034 |  0.0222 |    -0.168 | -0.0035 |  -0.2066 |  0.2086 |     0.3636 |        1.0 |
+
+* Plot 1
+#+begin_src python :session :results file
+inv_map = {v: k for k, v in mapping.items()}
+filename = 'plot1.png'
+plot_var = 'diet_hab'
+ploting = group_data(data, plot_var)
+plt.bar(x=ploting.index, height=ploting['depression'])
+plt.title(f'Percentage of students with depression by {inv_map[plot_var]}')
+plt.ylabel('Percent with Depression')
+plt.xlabel(inv_map[plot_var])
+plt.savefig(filename)
+plt.close()
+filename
+#+end_src
+
+#+RESULTS:
+[[file:plot1.png]]
+* Plot 2
 #+begin_src python :session :results file
 
 #+end_src
