@@ -1,0 +1,13 @@
+#+title: Static Vis
+#+author: Martin Hawks
+
+* Setup
+#+begin_src python :results none :session
+import pandas as pd
+import matplotlib.pyplot as plt
+#+end_src
+
+* Vis 1
+#+begin_src python :session :results file
+
+#+end_src
