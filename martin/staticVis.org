@@ -94,5 +94,24 @@ filename
 [[file:plot1.png]]
 * Plot 2
 #+begin_src python :session :results file
-
+filename = 'plot2.png'
+thought = data[data['thoughts']]
+no_thought = data[~data['thoughts']]
+plot_var = 'ac_pressure'
+thoughtGroup = group_data(thought, plot_var)
+no_tGroup = group_data(no_thought, plot_var)
+fig, (ax1, ax2) = plt.subplots(1, 2)
+ax1.bar(x=thoughtGroup.index, height=thoughtGroup['depression'])
+ax2.bar(x=no_tGroup.index, height=no_tGroup['depression'])
+ax1.set_title('With Suicidal thoughts')
+ax2.set_title('Without Suicidal thoughts')
+ax1.set_xlabel('Academic pressure')
+ax2.set_xlabel('Academic pressure')
+ax1.set_ylabel('Preportion of people with depression')
+fig.savefig(filename)
+plt.close()
+filename
 #+end_src
+
+#+RESULTS:
+[[file:plot2.png]]
